@@ -7,6 +7,8 @@ services:
       - .env
     environment:
       BUZZ_BIND_ADDR: 0.0.0.0:3000
+      # Relay now requires hex; this is the hex form of the owner npub1gjcwcpssve2ln0mxa8wquzkmn4magkpremde0wddlxkdp3arjasq02d6v9.
+      RELAY_OWNER_PUBKEY: ${RELAY_OWNER_PUBKEY_HEX:-44b0ec06106655f9bf66e9dc0e0adb9d77d45823cedb97b9adf9acd0c7a39760}
       BUZZ_HEALTH_PORT: "8080"
       BUZZ_METRICS_PORT: "9102"
       DATABASE_URL: postgres://${POSTGRES_USER:-buzz}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-buzz}
