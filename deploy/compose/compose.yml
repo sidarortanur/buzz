@@ -11,6 +11,8 @@ services:
       RELAY_OWNER_PUBKEY: ${RELAY_OWNER_PUBKEY_HEX:-44b0ec06106655f9bf66e9dc0e0adb9d77d45823cedb97b9adf9acd0c7a39760}
       # Desktop app origins: tauri://localhost (macOS/Linux), http://tauri.localhost (Windows).
       BUZZ_CORS_ORIGINS: ${BUZZ_CORS_ORIGINS_OVERRIDE:-https://buzz.finuans.com,tauri://localhost,http://tauri.localhost}
+      # Dedicated pairing relay for mobile QR pairing, routed by Traefik on /pair.
+      BUZZ_PAIRING_RELAY_URL: ${BUZZ_PAIRING_RELAY_URL:-wss://buzz.finuans.com/pair}
       BUZZ_HEALTH_PORT: "8080"
       BUZZ_METRICS_PORT: "9102"
       DATABASE_URL: postgres://${POSTGRES_USER:-buzz}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-buzz}
@@ -48,6 +50,17 @@ services:
       timeout: 3s
       retries: 12
       start_period: 30s
+    restart: unless-stopped
+    networks:
+      - buzz-net
+
+  # Ephemeral relay for device pairing (mobile QR). Same image as the relay;
+  # it keeps no state and accepts WebSocket upgrades on any path.
+  pair-relay:
+    image: ${BUZZ_IMAGE:-ghcr.io/block/buzz:main}
+    entrypoint: ["/usr/local/bin/buzz-pair-relay"]
+    environment:
+      BUZZ_PAIR_RELAY_BIND_ADDR: 0.0.0.0:5000
     restart: unless-stopped
     networks:
       - buzz-net
